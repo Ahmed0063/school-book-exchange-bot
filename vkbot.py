@@ -1,39 +1,26 @@
 import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-TOKEN = "YOUR_TOKEN_HERE"
+TOKEN = "ТВОЙ_ТОКЕН_ГРУППЫ"
+GROUP_ID = 237041501  # твой ID группы
 
 vk_session = vk_api.VkApi(token=TOKEN)
 vk = vk_session.get_api()
-longpoll = VkLongPoll(vk_session)
+longpoll = VkBotLongPoll(vk_session, GROUP_ID)
 
-# ===== БАЗА ДАННЫХ (в памяти) =====
-books = []
-requests = []
-
-
-def send_message(user_id, text):
-    vk.messages.send(user_id=user_id, message=text, random_id=0)
-
-
-print("Бот запущен...")
+print("Бот запущен!")
 
 for event in longpoll.listen():
-    if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-        user_id = event.user_id
-        text = event.text.strip()
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        message = event.object["message"]["text"].lower()
+        user_id = event.object["message"]["from_id"]
 
         # ===== СТАРТ =====
-        if text.lower() == "старт":
-            send_message(
-                user_id,
-                "📚 Бот книгообмена\n\n"
-                "Команды:\n"
-                "добавить Название книги\n"
-                "список\n"
-                "запрос НОМЕР\n"
-                "мои\n"
-                "удалить НОМЕР",
+        if message == "привет":
+            vk.messages.send(
+                user_id=user_id,
+                random_id=0,
+                message="Привет! Я работаю 😎"
             )
 
         # ===== ДОБАВИТЬ КНИГУ =====
